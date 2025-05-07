@@ -12,8 +12,11 @@ export const App = () => {
     user: usersFromServer.find(user => todo.userId === user.id),
   }));
 
-  const [title, setTitle] = useState('');
   const [todos, setTodos] = useState<Todo[]>(newTodos);
+
+  const [title, setTitle] = useState('');
+  const [titleError, setTitleError] = useState(false);
+
   const [select, setSelect] = useState(0);
   const [selectError, setSelectError] = useState(false);
 
@@ -30,8 +33,19 @@ export const App = () => {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (select === 0) {
+    if (select === 0 && !title) {
       setSelectError(true);
+      setTitleError(true);
+
+      return;
+    } else if (select === 0) {
+      setSelectError(true);
+
+      return;
+    } else if (!title) {
+      setTitleError(true);
+
+      return;
     }
 
     if (title && select > 0) {
@@ -61,14 +75,23 @@ export const App = () => {
             placeholder="title"
             name="title"
             value={title}
-            onChange={event => setTitle(event.target.value)}
-            required
+            onChange={event => {
+              setTitle(event.target.value);
+              setTitleError(false);
+            }}
           />
-          <span className="error">Please enter a title</span>
+
+          <span className="error">{titleError && 'Please enter a title'}</span>
         </div>
 
         <div className="field">
-          <select data-cy="userSelect">
+          <select
+            data-cy="userSelect"
+            onChange={event => {
+              setSelect(+event.target.value);
+              setSelectError(false);
+            }}
+          >
             <option value={0} disabled={selectError}>
               Choose a user
             </option>
@@ -79,7 +102,7 @@ export const App = () => {
             ))}
           </select>
 
-          <span className="error">Please choose a user</span>
+          <span className="error">{selectError && 'Please choose a user'}</span>
         </div>
 
         <button type="submit" data-cy="submitButton">
