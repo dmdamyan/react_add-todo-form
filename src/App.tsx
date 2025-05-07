@@ -13,6 +13,7 @@ export const App = () => {
   }));
 
   const [todos, setTodos] = useState<Todo[]>(newTodos);
+  const [disabled, setDisablet] = useState(false);
 
   const [title, setTitle] = useState('');
   const [titleError, setTitleError] = useState(false);
@@ -38,17 +39,17 @@ export const App = () => {
       setTitleError(true);
 
       return;
-    } else if (select === 0) {
+    } else if (select === 0 && title !== '') {
       setSelectError(true);
 
       return;
-    } else if (!title) {
+    } else if (title === '' && select > 0) {
       setTitleError(true);
 
       return;
     }
 
-    if (title && select > 0) {
+    if (title !== '' && select > 0) {
       const newTodo: Todo = {
         id: Math.max(...usersFromServer.map(user => user.id)) + 1,
         title,
@@ -58,7 +59,8 @@ export const App = () => {
       };
 
       handleAddNewTodo(newTodo);
-
+      setSelect(0);
+      setDisablet(false);
       reset();
     }
   };
@@ -87,14 +89,17 @@ export const App = () => {
         <div className="field">
           <select
             data-cy="userSelect"
+            value={select}
             onChange={event => {
               setSelect(+event.target.value);
               setSelectError(false);
+              setDisablet(true);
             }}
           >
-            <option value={0} disabled={selectError}>
+            <option value={0} disabled={disabled}>
               Choose a user
             </option>
+
             {usersFromServer.map(user => (
               <option value={user.id} key={user.id}>
                 {user.name}
